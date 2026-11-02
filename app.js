@@ -113,7 +113,10 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     }, { once: true });
     video.volume = volume / 10;
     const started = performance.now();
-    video.play().catch(() => {});
+    video.play().catch((e) => {
+      // The browser blocked autoplay with sound; a tap on the screen will start it.
+      if (e.name === "NotAllowedError") { staticOff(); osd("osdMsg", "▶ टैप करें", 0); }
+    });
     video.addEventListener("playing", function off() {
       // keep the static on screen a moment even when the video starts instantly
       setTimeout(staticOff, Math.max(0, 450 - (performance.now() - started)));
@@ -192,12 +195,44 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     const doc = document;
     if (doc.fullscreenElement || doc.webkitFullscreenElement) {
       (doc.exitFullscreen || doc.webkitExitFullscreen).call(doc);
-    } else if (screen.requestFullscreen) {
+      return;
+    }
+    if (!powered) power();
+    if (screen.requestFullscreen) {
       screen.requestFullscreen().catch(() => {});
+    } else if (screen.webkitRequestFullscreen) {
+      screen.webkitRequestFullscreen();
     } else if (video.webkitEnterFullscreen) {
       video.webkitEnterFullscreen(); // iPhone only allows the video itself to go full screen
     }
   }
+
+  // ---------- lights ----------
+  let lightsOff = store.get("lightsOff", false);
+  function setLights(off) {
+    lightsOff = off;
+    document.body.classList.toggle("lights-off", off);
+    $("btnLights").setAttribute("aria-pressed", off);
+    $("lightsLabel").textContent = off ? "लाइट चालू" : "लाइट बंद";
+    store.set("lightsOff", off);
+  }
+  setLights(lightsOff);
+
+  // Tint the light spilling into the dark room with the picture's average colour.
+  const amb = document.createElement("canvas");
+  amb.width = amb.height = 4;
+  const actx = amb.getContext("2d", { willReadFrequently: true });
+  setInterval(() => {
+    if (!lightsOff || !powered || usingFrame || video.paused || video.readyState < 2) return;
+    try {
+      actx.drawImage(video, 0, 0, 4, 4);
+      const d = actx.getImageData(0, 0, 4, 4).data;
+      let r = 0, g = 0, b = 0;
+      for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+      const n = d.length / 4, lift = (c) => Math.min(255, Math.round(c / n * 1.1 + 15));
+      stage.style.setProperty("--amb", `rgb(${lift(r)}, ${lift(g)}, ${lift(b)})`);
+    } catch { /* picture not readable (no CORS); keep the default blue */ }
+  }, 400);
 
   // ---------- menu ----------
   function renderList() {
@@ -261,6 +296,8 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
   $("btnMenu").onclick = toggleMenu;
   $("btnCabinet").onclick = openMenu;
   $("btnPoster").onclick = guard(() => tune(Math.floor(Math.random() * episodes.length)));
+  $("btnLamp").onclick = $("btnLights").onclick = () => setLights(!lightsOff);
+  $("btnFull").onclick = fullscreen;
 
   let clickTimer;
   screen.addEventListener("click", (e) => {
@@ -280,6 +317,7 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key;
     if (k === "p" || k === "P") return power();
+    if (k === "d" || k === "D") return setLights(!lightsOff);
     if (!powered) { if (k === " " || k === "Enter") { e.preventDefault(); power(); } return; }
     if (!menu.hidden) {
       if (k === "ArrowDown" || k === "ArrowUp") {
@@ -298,6 +336,7 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
       ArrowUp: () => setVolume(volume + 1), ArrowDown: () => setVolume(volume - 1),
       " ": togglePause, k: togglePause, j: () => seekBy(-10), l: () => seekBy(10),
       m: toggleMenu, M: toggleMenu, f: fullscreen, F: fullscreen,
+      d: () => setLights(!lightsOff), D: () => setLights(!lightsOff),
     };
     if (map[k]) { e.preventDefault(); map[k](); }
   });

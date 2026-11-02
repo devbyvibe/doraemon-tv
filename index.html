@@ -16,7 +16,7 @@
   <img class="room" src="assets/room.webp" alt="Nobita's room with a CRT TV" draggable="false">
 
   <div class="screen off" id="screen">
-    <video id="video" playsinline preload="metadata"></video>
+    <video id="video" playsinline preload="metadata" crossorigin="anonymous"></video>
     <iframe id="frame" title="Episode" allow="autoplay; fullscreen" hidden></iframe>
     <canvas id="noise" width="160" height="96"></canvas>
 
@@ -51,13 +51,20 @@
   <button class="hot" id="btnMenu" aria-label="Episode menu"></button>
   <button class="hot cab" id="btnCabinet" aria-label="Episode menu"></button>
   <button class="hot poster" id="btnPoster" aria-label="Surprise episode"></button>
+  <button class="hot lamp" id="btnLamp" aria-label="Lights on or off"></button>
   <span class="led" id="led"></span>
+  <div class="dim" aria-hidden="true"></div>
+  <div class="spill" aria-hidden="true"></div>
   <div class="hint" id="hint">पावर दबाएँ</div>
 </main>
 
-<p class="keys">
-  <b>⏻</b> power · <b>← →</b> channel · <b>↑ ↓</b> volume · <b>space</b> pause · <b>J L</b> ±10s · <b>M</b> menu · <b>F</b> full screen · <b>0–9</b> episode number
-</p>
+<nav class="bar">
+  <button type="button" id="btnLights" aria-pressed="false"><span class="ico">◐</span><span id="lightsLabel">लाइट बंद</span></button>
+  <button type="button" id="btnFull"><span class="ico">⛶</span>फुल स्क्रीन</button>
+  <p class="keys">
+    <b>⏻</b> power · <b>← →</b> channel · <b>↑ ↓</b> volume · <b>space</b> pause · <b>J L</b> ±10s · <b>M</b> menu · <b>D</b> lights · <b>F</b> full screen · <b>0–9</b> episode number
+  </p>
+</nav>
 
 <script src="app.js"></script>
 </body>
