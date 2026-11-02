@@ -1,0 +1,200 @@
+:root {
+  --bg: #1b1410;
+  --osd: #8dff9a;
+  --osd-glow: #3dff63;
+  --menu: rgba(16, 38, 120, .88);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 40%, #3a2a1f, var(--bg) 70%);
+  color: #f3e9d6;
+  font-family: Hind, system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+/* Everything on the stage is placed in the room image's own pixels (1672 x 941). */
+.stage {
+  --W: 1672; --H: 941;
+  position: relative;
+  width: min(100vw, calc((100dvh - 44px) * 1672 / 941));
+  aspect-ratio: 1672 / 941;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.room { display: block; width: 100%; height: 100%; }
+.at {
+  position: absolute;
+  left: calc(var(--x) / var(--W) * 100%);
+  top: calc(var(--y) / var(--H) * 100%);
+  width: calc(var(--w) / var(--W) * 100%);
+  height: calc(var(--h) / var(--H) * 100%);
+}
+
+/* ---------- screen ---------- */
+.screen {
+  --x: 481; --y: 178; --w: 706; --h: 408;
+  position: absolute;
+  left: calc(var(--x) / var(--W) * 100%);
+  top: calc(var(--y) / var(--H) * 100%);
+  width: calc(var(--w) / var(--W) * 100%);
+  height: calc(var(--h) / var(--H) * 100%);
+  border-radius: 5% / 8.5%;
+  overflow: hidden;
+  background: #050807;
+  container-type: size;
+  cursor: pointer;
+}
+.screen video, .screen iframe, .screen canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+}
+.screen video { object-fit: contain; background: #000; filter: saturate(1.15) contrast(1.05); }
+.screen canvas { image-rendering: pixelated; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.screen.static canvas { opacity: 1; }
+
+.glass {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 28% 12%, rgba(255,255,255,.16), transparent 40%),
+    radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(0,0,0,.6) 100%);
+  box-shadow: inset 0 0 3cqw rgba(0,0,0,.85), inset 0 0 .4cqw #000;
+  animation: flicker 6s infinite steps(1);
+}
+@keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: .93; } 48% { opacity: 1; } 81% { opacity: .96; } }
+
+/* Power off: picture collapses into a line, then a dot. */
+.beam { position: absolute; inset: 0; pointer-events: none; background: #050807; opacity: 0; }
+.screen.off > :not(.beam):not(.glass) { visibility: hidden; }
+.screen.off .beam { opacity: 1; }
+.screen.powering-off .beam { animation: crt-off .55s ease-in forwards; }
+.screen.powering-on .beam { animation: crt-on .7s ease-out forwards; }
+@keyframes crt-off {
+  0% { opacity: 0; }
+  1% { opacity: 1; background: radial-gradient(ellipse 100% 1.2% at 50% 50%, #fff 0 60%, #050807 100%); }
+  55% { background: radial-gradient(ellipse 60% .8% at 50% 50%, #fff 0 50%, #050807 100%); }
+  80% { background: radial-gradient(circle 1.2cqw at 50% 50%, #fff, #050807); }
+  100% { opacity: 1; background: #050807; }
+}
+@keyframes crt-on {
+  0% { opacity: 1; background: radial-gradient(ellipse 0% .6% at 50% 50%, #fff, #050807); }
+  35% { opacity: 1; background: radial-gradient(ellipse 100% 1% at 50% 50%, #fff 0 70%, #050807 100%); }
+  100% { opacity: 0; background: radial-gradient(ellipse 100% 100% at 50% 50%, #fff, #050807); }
+}
+
+/* ---------- on-screen display ---------- */
+.osd {
+  position: absolute; z-index: 2; pointer-events: none;
+  font-family: VT323, monospace; color: var(--osd);
+  text-shadow: 0 0 .6cqw var(--osd-glow), .25cqw 0 0 rgba(255,40,100,.35), -.25cqw 0 0 rgba(40,200,255,.35);
+  opacity: 0; transition: opacity .25s;
+}
+.osd.show { opacity: 1; }
+.osd.ch { right: 6cqw; top: 6cqh; font-size: 9cqh; }
+.osd.title { left: 6cqw; bottom: 7cqh; right: 6cqw; font: 600 5.6cqh/1.15 Hind, sans-serif; }
+.osd.title small { display: block; font: 4.6cqh VT323, monospace; opacity: .85; }
+.osd.msg { left: 0; right: 0; top: 44cqh; text-align: center; font-size: 8cqh; }
+.osd.vol { left: 6cqw; right: 6cqw; bottom: 8cqh; font-size: 6cqh; display: flex; gap: 2cqw; align-items: center; }
+.osd.vol i { flex: 1; height: 3.4cqh; background: repeating-linear-gradient(90deg, var(--osd) 0 2.2cqw, transparent 2.2cqw 3cqw); box-shadow: 0 0 .6cqw var(--osd-glow); }
+.osd.seek { left: 6cqw; right: 6cqw; bottom: 3cqh; display: flex; gap: 2cqw; align-items: center; font-size: 5cqh; pointer-events: auto; cursor: pointer; }
+.osd.seek .bar { flex: 1; height: 1.8cqh; border: .3cqh solid var(--osd); padding: .3cqh; }
+.osd.seek .bar i { display: block; height: 100%; width: 0; background: var(--osd); }
+.osd.seek:not(.show) { pointer-events: none; }
+
+/* ---------- menu ---------- */
+.menu {
+  position: absolute; inset: 6cqh 6cqw; z-index: 3;
+  display: flex; flex-direction: column;
+  background: var(--menu); border: .5cqh solid #c9d6ff;
+  font-family: VT323, monospace; color: #fff; text-shadow: .3cqh .3cqh 0 #000;
+  cursor: default;
+}
+.menu[hidden] { display: none; }
+.menu-head { display: flex; justify-content: space-between; align-items: center; padding: 1.6cqh 2.4cqw; font: 600 5.4cqh Hind, sans-serif; background: rgba(255,255,255,.12); }
+.menu-tools { display: flex; gap: 1.4cqw; }
+.menu button {
+  font: 4.6cqh VT323, monospace; color: #fff; background: rgba(0,0,0,.35);
+  border: .3cqh solid #c9d6ff; padding: .2cqh 1.4cqw; cursor: pointer;
+}
+.menu button:hover, .menu button:focus-visible { background: #ffd34d; color: #10257a; text-shadow: none; outline: none; }
+.list { list-style: none; margin: 0; padding: 1cqh 0; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #c9d6ff transparent; }
+.list li { display: flex; gap: 2cqw; padding: .6cqh 2.4cqw; font-size: 5.6cqh; cursor: pointer; white-space: nowrap; }
+.list li .c { width: 13cqw; flex: none; color: #ffd34d; }
+.list li .t { overflow: hidden; text-overflow: ellipsis; }
+.list li .w { margin-left: auto; color: #9fe8ff; font-size: 4.4cqh; }
+.list li.sel { background: #ffd34d; color: #10257a; text-shadow: none; }
+.list li.sel .c, .list li.sel .w { color: #10257a; }
+.list li.now .c::before { content: "▶"; margin-right: .6cqw; }
+.menu-foot { padding: 1.2cqh 2.4cqw; font-size: 4.2cqh; color: #c9d6ff; border-top: .3cqh solid rgba(201,214,255,.4); }
+
+/* ---------- TV buttons (invisible hotspots over the drawn buttons) ---------- */
+.hot {
+  position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer;
+  left: calc(var(--x) / var(--W) * 100%);
+  top: calc(var(--y) / var(--H) * 100%);
+  width: calc(var(--w) / var(--W) * 100%);
+  height: calc(var(--h) / var(--H) * 100%);
+  border-radius: 40%;
+}
+.hot:hover { background: rgba(255,255,255,.12); }
+.hot:active { background: rgba(0,0,0,.25); transform: translateY(1px); }
+.hot:focus-visible { outline: 2px solid #ffd34d; outline-offset: 2px; }
+#btnPower   { --x: 628; --y: 614; --w: 62; --h: 40; }
+#btnChDown  { --x: 715; --y: 616; --w: 52; --h: 36; }
+#btnChUp    { --x: 777; --y: 616; --w: 52; --h: 36; }
+#btnVolDown { --x: 843; --y: 616; --w: 52; --h: 36; }
+#btnVolUp   { --x: 905; --y: 616; --w: 52; --h: 36; }
+#btnMenu    { --x: 975; --y: 614; --w: 60; --h: 40; }
+#btnCabinet { --x: 505; --y: 726; --w: 645; --h: 140; border-radius: 6px; }
+#btnPoster  { --x: 556; --y: 0;   --w: 156; --h: 108; border-radius: 6px; }
+.cab:hover, .poster:hover { background: rgba(255,255,255,.06); }
+
+.led {
+  --x: 1055; --y: 627; --w: 14; --h: 14;
+  position: absolute; border-radius: 50%; pointer-events: none;
+  left: calc(var(--x) / var(--W) * 100%); top: calc(var(--y) / var(--H) * 100%);
+  width: calc(var(--w) / var(--W) * 100%); height: calc(var(--h) / var(--H) * 100%);
+  background: radial-gradient(circle at 40% 35%, #ff9b8f, #d8261b 60%, #6b0d07);
+  box-shadow: 0 0 6px #ff3b2f;
+}
+.led.on { background: radial-gradient(circle at 40% 35%, #d8ffd0, #39d64a 60%, #136b1d); box-shadow: 0 0 8px #49ff5c; }
+
+.hint {
+  position: absolute; left: calc(560 / 1672 * 100%); top: calc(668 / 941 * 100%);
+  width: calc(200 / 1672 * 100%); text-align: center; pointer-events: none;
+  font: 600 clamp(11px, 1.3vw, 20px) Hind, sans-serif; color: #fff;
+  background: #d8261b; border-radius: 6px; padding: .2em .6em;
+  box-shadow: 0 4px 10px rgba(0,0,0,.5);
+  animation: bob 1.2s ease-in-out infinite;
+}
+.hint::before { content: ""; position: absolute; left: 50%; top: -.5em; margin-left: -.5em; border: .5em solid transparent; border-top: 0; border-bottom-color: #d8261b; }
+.hint[hidden] { display: none; }
+@keyframes bob { 50% { transform: translateY(4px); } }
+
+.keys { margin: 8px 16px; font-size: 13px; color: #b9a891; text-align: center; line-height: 1.6; }
+.keys b { color: #f3e9d6; font-weight: 600; }
+
+/* Full screen: just the TV picture, still with the CRT glass. */
+.screen:fullscreen { border-radius: 0; width: 100vw; height: 100vh; left: 0; top: 0; }
+.screen:-webkit-full-screen { border-radius: 0; width: 100vw; height: 100vh; left: 0; top: 0; }
+
+/* Portrait phones: zoom in on the TV and let the room's edges crop off. */
+@media (max-aspect-ratio: 1/1) {
+  .stage { width: 190vw; flex: none; }
+  .keys { font-size: 12px; }
+}
+@media (hover: none) {
+  .keys { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass, .hint { animation: none; }
+}
+
+/* ?debug shows where the screen and buttons sit on the image. */
+.debug .hot { outline: 1px solid #0ff; background: rgba(0,255,255,.15); }
+.debug .screen { outline: 2px solid #f0f; }

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Doraemon TV</title>
+<meta name="description" content="Nobita's room TV, playing Doraemon episodes.">
+<meta name="theme-color" content="#1b1410">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='10' width='56' height='42' rx='8' fill='%23474a5a'/><rect x='10' y='15' width='44' height='30' rx='6' fill='%233f8fe0'/><circle cx='32' cy='30' r='9' fill='%23fff'/><circle cx='32' cy='30' r='3' fill='%23e2231a'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Hind:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="stage" id="stage">
+  <img class="room" src="assets/room.webp" alt="Nobita's room with a CRT TV" draggable="false">
+
+  <div class="screen off" id="screen">
+    <video id="video" playsinline preload="metadata"></video>
+    <iframe id="frame" title="Episode" allow="autoplay; fullscreen" hidden></iframe>
+    <canvas id="noise" width="160" height="96"></canvas>
+
+    <div class="osd ch" id="osdCh"></div>
+    <div class="osd title" id="osdTitle"></div>
+    <div class="osd msg" id="osdMsg"></div>
+    <div class="osd vol" id="osdVol"></div>
+    <div class="osd seek" id="osdSeek"><div class="bar"><i id="seekFill"></i></div><span id="seekTime"></span></div>
+
+    <div class="menu" id="menu" hidden>
+      <div class="menu-head">
+        <span>डोरेमोन · एपिसोड</span>
+        <span class="menu-tools">
+          <button id="verBtn" type="button"></button>
+          <button id="autoBtn" type="button"></button>
+          <button id="closeMenu" type="button" aria-label="Close menu">✕</button>
+        </span>
+      </div>
+      <ol class="list" id="list"></ol>
+      <div class="menu-foot">↑↓ चुनें · ENTER चलाएँ · नंबर दबाकर सीधा चैनल · M बंद</div>
+    </div>
+
+    <div class="glass"></div>
+    <div class="beam"></div>
+  </div>
+
+  <button class="hot power" id="btnPower" aria-label="Power"></button>
+  <button class="hot" id="btnChDown" aria-label="Previous episode"></button>
+  <button class="hot" id="btnChUp" aria-label="Next episode"></button>
+  <button class="hot" id="btnVolDown" aria-label="Volume down"></button>
+  <button class="hot" id="btnVolUp" aria-label="Volume up"></button>
+  <button class="hot" id="btnMenu" aria-label="Episode menu"></button>
+  <button class="hot cab" id="btnCabinet" aria-label="Episode menu"></button>
+  <button class="hot poster" id="btnPoster" aria-label="Surprise episode"></button>
+  <span class="led" id="led"></span>
+  <div class="hint" id="hint">पावर दबाएँ</div>
+</main>
+
+<p class="keys">
+  <b>⏻</b> power · <b>← →</b> channel · <b>↑ ↓</b> volume · <b>space</b> pause · <b>J L</b> ±10s · <b>M</b> menu · <b>F</b> full screen · <b>0–9</b> episode number
+</p>
+
+<script src="app.js"></script>
+</body>
+</html>
