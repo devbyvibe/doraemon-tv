@@ -1,3 +1,7 @@
+// Address of your Cloudflare Worker (worker/drive-relay.js), without a trailing slash.
+// Browsers can't stream Drive files directly from another site, so videos go through it.
+const RELAY = "https://doraemon-tv.YOUR-SUBDOMAIN.workers.dev";
+
 (() => {
   const $ = (id) => document.getElementById(id);
   const stage = $("stage"), screen = $("screen"), video = $("video"), frame = $("frame");
@@ -26,7 +30,8 @@
   };
   const wrap = (i) => (i + episodes.length) % episodes.length;
   const version = (ep) => ep.versions.find((v) => v.tag === pref) || ep.versions[0];
-  const streamUrl = (id) => `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
+  const relay = new URLSearchParams(location.search).get("relay") || RELAY;
+  const streamUrl = (id) => `${relay}/?id=${encodeURIComponent(id)}`;
 
   const osdTimers = {};
   function osd(id, html, ms = 2500) {
