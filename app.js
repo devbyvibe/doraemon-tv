@@ -1,6 +1,6 @@
 // Address of your Cloudflare Worker (worker/drive-relay.js), without a trailing slash.
 // Browsers can't stream Drive files directly from another site, so videos go through it.
-const RELAY = "https://doraemon-tv.YOUR-SUBDOMAIN.workers.dev";
+const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
 
 (() => {
   const $ = (id) => document.getElementById(id);
