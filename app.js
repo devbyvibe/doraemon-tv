@@ -115,7 +115,7 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     const started = performance.now();
     video.play().catch((e) => {
       // The browser blocked autoplay with sound; a tap on the screen will start it.
-      if (e.name === "NotAllowedError") { staticOff(); osd("osdMsg", "▶ टैप करें", 0); }
+      if (e.name === "NotAllowedError") { staticOff(); osd("osdMsg", "▶ TAP TO PLAY", 0); }
     });
     video.addEventListener("playing", function off() {
       // keep the static on screen a moment even when the video starts instantly
@@ -136,7 +136,7 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     staticOff();
     osd("osdMsg", "DRIVE PLAYER", 2500);
   });
-  video.addEventListener("waiting", () => powered && osd("osdMsg", "ट्यूनिंग…", 0));
+  video.addEventListener("waiting", () => powered && osd("osdMsg", "TUNING…", 0));
   video.addEventListener("playing", () => hide("osdMsg"));
   video.addEventListener("ended", () => {
     positions[version(episodes[idx]).id] = -1; store.set("pos", positions);
@@ -213,7 +213,8 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
     lightsOff = off;
     document.body.classList.toggle("lights-off", off);
     $("btnLights").setAttribute("aria-pressed", off);
-    $("lightsLabel").textContent = off ? "लाइट चालू" : "लाइट बंद";
+    $("btnLights").setAttribute("aria-label", off ? "Lights on" : "Lights off");
+    $("lightsLabel").textContent = off ? "LIGHTS ON" : "LIGHTS OFF";
     store.set("lightsOff", off);
   }
   setLights(lightsOff);
@@ -299,15 +300,52 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
   $("btnLamp").onclick = $("btnLights").onclick = () => setLights(!lightsOff);
   $("btnFull").onclick = fullscreen;
 
+  // ---------- full screen controls ----------
+  const isFs = () => screen.classList.contains("fs");
+  let uiTimer;
+  function showUi() {
+    if (!isFs()) return;
+    screen.classList.add("ui");
+    if (!usingFrame) osd("osdSeek", undefined, 3000);
+    clearTimeout(uiTimer);
+    uiTimer = setTimeout(() => screen.classList.remove("ui"), 3000);
+  }
+  function onFsChange() {
+    const on = (document.fullscreenElement || document.webkitFullscreenElement) === screen;
+    screen.classList.toggle("fs", on);
+    if (on) showUi(); else screen.classList.remove("ui");
+  }
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+
+  const fsActions = {
+    prev: () => tune(idx - 1), next: () => tune(idx + 1), play: togglePause,
+    voldown: () => setVolume(volume - 1), volup: () => setVolume(volume + 1),
+    menu: toggleMenu, exit: fullscreen,
+  };
+  $("fsbar").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const act = e.target.closest("button")?.dataset.act;
+    if (act) fsActions[act]();
+    showUi();
+  });
+  $("fsbar").addEventListener("dblclick", (e) => e.stopPropagation());
+
   let clickTimer;
   screen.addEventListener("click", (e) => {
     if (!powered) return power();
     if (e.target.closest(".seek")) return;
+    // In full screen the first tap just brings the controls back.
+    if (isFs() && !screen.classList.contains("ui")) return showUi();
+    showUi();
     clearTimeout(clickTimer);
     clickTimer = setTimeout(togglePause, 250); // wait to see if it is a double click
   });
   screen.addEventListener("dblclick", () => { clearTimeout(clickTimer); if (powered) fullscreen(); });
-  screen.addEventListener("pointermove", () => powered && !usingFrame && menu.hidden && osd("osdSeek", undefined, 2500));
+  screen.addEventListener("pointermove", () => {
+    if (isFs()) return showUi();
+    if (powered && !usingFrame && menu.hidden) osd("osdSeek", undefined, 2500);
+  });
   $("osdSeek").addEventListener("click", (e) => {
     const r = e.currentTarget.querySelector(".bar").getBoundingClientRect();
     if (video.duration) video.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * video.duration;
@@ -345,5 +383,5 @@ const RELAY = "https://doraemon-tv.samit-sada.workers.dev";
   fetch("episodes.json")
     .then((r) => r.json())
     .then((data) => { episodes = data; idx = Math.min(idx, episodes.length - 1); })
-    .catch(() => { $("hint").textContent = "episodes.json नहीं मिला"; });
+    .catch(() => { $("hint").textContent = "Couldn't load episodes"; });
 })();

@@ -22,10 +22,11 @@ body {
 .stage {
   --W: 1672; --H: 941;
   position: relative;
-  width: min(100vw, calc((100dvh - 96px) * 1672 / 941));
+  width: min(100vw, calc((100dvh - 48px) * 1672 / 941));
   aspect-ratio: 1672 / 941;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  container-type: inline-size;
 }
 .room { display: block; width: 100%; height: 100%; }
 .at {
@@ -99,7 +100,7 @@ body {
 .osd.title { left: 6cqw; bottom: 7cqh; right: 6cqw; font: 600 5.6cqh/1.15 Hind, sans-serif; }
 .osd.title small { display: block; font: 4.6cqh VT323, monospace; opacity: .85; }
 .osd.msg { left: 0; right: 0; top: 44cqh; text-align: center; font-size: 8cqh; }
-.osd.vol { left: 6cqw; right: 6cqw; bottom: 8cqh; font-size: 6cqh; display: flex; gap: 2cqw; align-items: center; }
+.osd.vol { left: 6cqw; right: 45cqw; top: 7cqh; font-size: 6cqh; display: flex; gap: 2cqw; align-items: center; }
 .osd.vol i { flex: 1; height: 3.4cqh; background: repeating-linear-gradient(90deg, var(--osd) 0 2.2cqw, transparent 2.2cqw 3cqw); box-shadow: 0 0 .6cqw var(--osd-glow); }
 .osd.seek { left: 6cqw; right: 6cqw; bottom: 3cqh; display: flex; gap: 2cqw; align-items: center; font-size: 5cqh; pointer-events: auto; cursor: pointer; }
 .osd.seek .bar { flex: 1; height: 1.8cqh; border: .3cqh solid var(--osd); padding: .3cqh; }
@@ -203,27 +204,56 @@ body {
 body { transition: background-color .9s; }
 body.lights-off { background: #040408; }
 
-/* ---------- bar under the TV ---------- */
-.bar {
-  position: relative; z-index: 5;
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: 8px 12px; margin: 10px 16px;
+/* ---------- buttons on the TV stand's side panels ---------- */
+.tvbtn {
+  position: absolute; z-index: 5;
+  left: calc(var(--x) / var(--W) * 100%); top: calc(var(--y) / var(--H) * 100%);
+  width: calc(var(--w) / var(--W) * 100%); height: calc(var(--h) / var(--H) * 100%);
+  display: flex; align-items: center; justify-content: center; padding: 0;
+  border-radius: 999px; border: .14cqw solid #1d1f28; cursor: pointer;
+  background: linear-gradient(#545869, #343744 55%, #2b2d38);
+  box-shadow: inset 0 .12cqw 0 rgba(255,255,255,.28), inset 0 0 0 .1cqw rgba(160,170,200,.35), 0 .2cqw .35cqw rgba(0,0,0,.45);
+  color: #dfe3ef; transition: filter .15s, transform .05s, opacity .9s;
 }
-.bar button {
-  display: inline-flex; align-items: center; gap: 6px;
-  font: 600 14px Hind, sans-serif; color: #f3e9d6;
-  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18);
-  border-radius: 999px; padding: 6px 14px; cursor: pointer;
-  transition: background .2s, opacity .9s;
+.tvbtn .ico { font-size: 1.5cqw; line-height: 1; }
+.tvbtn .lbl {
+  position: absolute; top: 118%; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font: 600 .82cqw/1 Hind, sans-serif; letter-spacing: .04em; color: #c9cede;
+  text-shadow: 0 1px 0 rgba(0,0,0,.6);
 }
-.bar button:hover { background: rgba(255, 255, 255, .16); }
-.bar button:focus-visible { outline: 2px solid #ffd34d; outline-offset: 2px; }
-.bar button[aria-pressed="true"] { background: #ffd34d; color: #2a1b06; border-color: #ffd34d; }
-.bar .ico { font-size: 16px; line-height: 1; }
-.lights-off .bar { opacity: .55; }
-.lights-off .bar:hover, .lights-off .bar:focus-within { opacity: 1; }
-.keys { flex-basis: 100%; margin: 0; font-size: 13px; color: #b9a891; text-align: center; line-height: 1.6; }
+.tvbtn:hover { filter: brightness(1.2); }
+.tvbtn:active { transform: translateY(1px); filter: brightness(.9); }
+.tvbtn:focus-visible { outline: 2px solid #ffd34d; outline-offset: 3px; }
+.tvbtn[aria-pressed="true"] .ico { color: #ffd34d; text-shadow: 0 0 .5cqw #ffb800; }
+#btnLights { --x: 408; --y: 762; --w: 82; --h: 40; }
+#btnFull   { --x: 1168; --y: 762; --w: 82; --h: 40; }
+.lights-off .tvbtn { opacity: .55; }
+.lights-off .tvbtn:hover, .lights-off .tvbtn:focus-visible { opacity: 1; }
+
+.keys { position: relative; z-index: 5; margin: 10px 16px; font-size: 13px; color: #b9a891; text-align: center; line-height: 1.6; transition: opacity .9s; }
 .keys b { color: #f3e9d6; font-weight: 600; }
+.lights-off .keys { opacity: .4; }
+
+/* ---------- controls shown in full screen ---------- */
+.fsbar {
+  position: absolute; z-index: 4; left: 50%; bottom: 10cqh; transform: translateX(-50%);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: .4em; padding: .35em .6em;
+  width: max-content; max-width: 94cqw;
+  font: clamp(16px, 3cqh, 28px)/1 VT323, monospace;
+  background: rgba(4, 12, 8, .78); border: 1px solid rgba(141, 255, 154, .45); border-radius: 999px;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.screen.fs.ui .fsbar { opacity: 1; pointer-events: auto; }
+.screen.fs .osd.title { transition: opacity .25s, bottom .25s; }
+.screen.fs.ui .osd.title { bottom: 20cqh; }
+.screen.fs:not(.ui) { cursor: none; }
+.fsbar button {
+  font: inherit; color: var(--osd); text-shadow: 0 0 6px var(--osd-glow);
+  background: transparent; border: 1px solid transparent; border-radius: 999px;
+  padding: .25em .7em; cursor: pointer;
+}
+.fsbar button:hover, .fsbar button:focus-visible { background: rgba(141, 255, 154, .16); border-color: rgba(141, 255, 154, .5); outline: none; }
+.fsbar .exit { color: #fff; text-shadow: none; border-color: rgba(255, 255, 255, .4); }
 
 /* Full screen: just the TV picture, still with the CRT glass. */
 .screen:fullscreen { border-radius: 0; width: 100vw; height: 100vh; left: 0; top: 0; }

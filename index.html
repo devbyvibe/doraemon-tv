@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -28,7 +28,7 @@
 
     <div class="menu" id="menu" hidden>
       <div class="menu-head">
-        <span>डोरेमोन · एपिसोड</span>
+        <span>Doraemon · Episodes</span>
         <span class="menu-tools">
           <button id="verBtn" type="button"></button>
           <button id="autoBtn" type="button"></button>
@@ -36,7 +36,17 @@
         </span>
       </div>
       <ol class="list" id="list"></ol>
-      <div class="menu-foot">↑↓ चुनें · ENTER चलाएँ · नंबर दबाकर सीधा चैनल · M बंद</div>
+      <div class="menu-foot">↑↓ choose · ENTER play · type a number to jump · M close</div>
+    </div>
+
+    <div class="fsbar" id="fsbar">
+      <button type="button" data-act="prev" aria-label="Previous episode">⏮</button>
+      <button type="button" data-act="play" aria-label="Play or pause">⏯</button>
+      <button type="button" data-act="next" aria-label="Next episode">⏭</button>
+      <button type="button" data-act="voldown">VOL−</button>
+      <button type="button" data-act="volup">VOL+</button>
+      <button type="button" data-act="menu">EPISODES</button>
+      <button type="button" data-act="exit" class="exit">✕ EXIT FULL SCREEN</button>
     </div>
 
     <div class="glass"></div>
@@ -55,16 +65,15 @@
   <span class="led" id="led"></span>
   <div class="dim" aria-hidden="true"></div>
   <div class="spill" aria-hidden="true"></div>
-  <div class="hint" id="hint">पावर दबाएँ</div>
+  <!-- Above the dim layer so they stay findable with the lights off. -->
+  <button class="tvbtn" id="btnLights" type="button" aria-pressed="false" aria-label="Lights off"><span class="ico">◐</span><span class="lbl" id="lightsLabel">LIGHTS OFF</span></button>
+  <button class="tvbtn" id="btnFull" type="button" aria-label="Full screen"><span class="ico">⛶</span><span class="lbl">FULL SCREEN</span></button>
+  <div class="hint" id="hint">Press power</div>
 </main>
 
-<nav class="bar">
-  <button type="button" id="btnLights" aria-pressed="false"><span class="ico">◐</span><span id="lightsLabel">लाइट बंद</span></button>
-  <button type="button" id="btnFull"><span class="ico">⛶</span>फुल स्क्रीन</button>
-  <p class="keys">
-    <b>⏻</b> power · <b>← →</b> channel · <b>↑ ↓</b> volume · <b>space</b> pause · <b>J L</b> ±10s · <b>M</b> menu · <b>D</b> lights · <b>F</b> full screen · <b>0–9</b> episode number
-  </p>
-</nav>
+<p class="keys">
+  <b>⏻</b> power · <b>← →</b> channel · <b>↑ ↓</b> volume · <b>space</b> pause · <b>J L</b> ±10s · <b>M</b> menu · <b>D</b> lights · <b>F</b> full screen · <b>0–9</b> episode number
+</p>
 
 <script src="app.js"></script>
 </body>
